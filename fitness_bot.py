@@ -1,3 +1,7 @@
+from dotenv import load_dotenv
+import os
+from flask import Flask
+from threading import Thread
 import sqlite3
 import matplotlib.pyplot as plt
 from telegram import Update, ReplyKeyboardMarkup
@@ -11,6 +15,26 @@ from telegram.ext import (
 )
 from datetime import datetime
 import random  # Добавлен для случайного выбора тренировки
+
+app_flask = Flask(__name__)
+
+
+@app_flask.route("/")
+def home():
+    return "Bot is running!"
+
+
+def run_flask():
+    app_flask.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+
+
+# Загрузка переменных окружения
+load_dotenv()
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+if not BOT_TOKEN:
+    print("Ошибка: переменная окружения BOT_TOKEN не найдена.")
+    exit(1)
 
 # Константы состояний для ConversationHandler
 WEIGHT, HEIGHT, WAIST, CALORIES_SPENT, CALORIES_EATEN, STEPS = range(6)
@@ -361,11 +385,19 @@ async def cancel_workout(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Основной блок запуска бота
 if __name__ == "__main__":
-    # Вставь сюда свой токен бота
-    TOKEN = "8014120918:AAGiExPQMXL3ffJKRzd8rdRs4fJHix0fdJQ"
+    # Загрузка токена из переменной окружения
+    import os
+    from dotenv import load_dotenv
+
+    load_dotenv()
+    TOKEN = os.getenv("BOT_TOKEN")
+
+    if not TOKEN:
+        print("Ошибка: переменная окружения BOT_TOKEN не найдена.")
+        exit(1)
 
     # Создаем приложение и добавляем обработчики команд
-    app = ApplicationBuilder().token(TOKEN).build()
+    app = ApplicationBuilder().token(BOT_TOKEN).build()
 
     # Обработчики команд
     app.add_handler(CommandHandler("start", start))
@@ -410,6 +442,23 @@ if __name__ == "__main__":
 
     app.add_handler(conv_handler)
     app.add_handler(conv_workout)
+
+app_flask = Flask(__name__)
+
+
+@app_flask.route("/")
+def home():
+    return "Bot is running!"
+
+
+def run_flask():
+    app_flask.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+
+
+if __name__ == "__main__":
+    # Запуск Flask сервера в отдельном потоке
+    flask_thread = Thread(target=run_flask)
+    flask_thread.start()
 
     # Запуск бота
     print("Бот запущен. Ожидание команд...")
