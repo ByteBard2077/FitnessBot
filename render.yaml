@@ -1,0 +1,7 @@
+services:
+  - type: worker
+    name: FitnessBot
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python3 fitness_bot.py"
+
